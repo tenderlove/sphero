@@ -1,0 +1,8 @@
+.autotest
+CHANGELOG.rdoc
+Manifest.txt
+README.markdown
+Rakefile
+bin/sphero
+lib/sphero.rb
+test/test_sphero.rb
