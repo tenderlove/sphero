@@ -13,6 +13,7 @@ Hoe.spec 'sphero' do
   self.readme_file   = 'README.markdown'
   self.history_file  = 'CHANGELOG.rdoc'
   self.extra_rdoc_files  = FileList['*.{rdoc,markdown}']
+  self.extra_deps << ['serialport']
 end
 
 # vim: syntax=ruby
