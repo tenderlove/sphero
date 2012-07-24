@@ -42,6 +42,25 @@ class Sphero
       packet_body.bytesize + 1
     end
 
+    class Sphero < Request
+      def initialize seq, data = []
+        super
+        @did = 0x02
+      end
+    end
+
+    class Heading < Sphero
+      def initialize seq, heading
+        super(seq, [heading])
+        @cid  = 0x01
+      end
+
+      private
+      def packet_body
+        @data.pack 'n'
+      end
+    end
+
     class Ping < Request
       def initialize seq
         super(seq, [])

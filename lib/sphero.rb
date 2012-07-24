@@ -53,7 +53,7 @@ class Sphero
   end
 
   def heading= h
-    write 0x01, [h >> 8, h & 0xFF], 0x02
+    write_packet Request::Heading.new(@seq, h)
   end
 
   private
@@ -108,5 +108,9 @@ if $0 == __FILE__
     p s.ping
   }
 
-  p s.sleep(10)
+  0.step(360, 1) { |i|
+    i = 0 if i == 360
+    s.heading = i
+    sleep 0.5
+  }
 end
