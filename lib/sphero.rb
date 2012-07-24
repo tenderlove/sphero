@@ -39,6 +39,11 @@ class Sphero
     write_packet Request::GetPowerState.new(@seq)
   end
 
+  def sleep wakeup = 0, macro = 0
+    obj = Request::Sleep.new(@seq, wakeup, macro)
+    write_packet obj
+  end
+
   def roll speed, heading, delay = 0x01
     cmd = [speed, heading >> 8, heading & 0xFF, delay]
     write 0x30, cmd, 0x02
@@ -104,8 +109,5 @@ if $0 == __FILE__
     p s.ping
   }
 
-  obj = s.bluetooth_info
-  ps = s.power_state
-  p ps
-  p ps.body
+  p s.sleep(10)
 end

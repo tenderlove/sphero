@@ -7,29 +7,39 @@ class Sphero
       @seq    = seq
       @data   = data
       @did    = 0x00
-      @dlen   = @data.length + 1
-      @format = 'C*'
     end
 
-    def data_bytes
-      [SOP1, SOP2, @did, @cid, @seq, @dlen] + @data
-    end
-
-    def checksum
-      ~(data_bytes.drop(2).reduce(:+) % 256) & 0xFF
-    end
-
-    def bytes
-      data_bytes << checksum
+    def header
+      [SOP1, SOP2, @did, @cid, @seq, dlen]
     end
 
     # The data to write to the socket
     def to_str
-      bytes.pack @format
+      bytes
     end
 
     def response header, body
       Response.new header, body
+    end
+
+    def packet_header
+      header.pack 'CCCCCC'
+    end
+
+    def packet_body
+      @data.pack 'C*'
+    end
+
+    def checksum
+      ~((packet_header + packet_body).unpack('C*').drop(2).reduce(:+) % 256) & 0xFF
+    end
+
+    def bytes
+      packet_header + packet_body + checksum.chr
+    end
+
+    def dlen
+      packet_body.bytesize + 1
     end
 
     class Ping < Request
@@ -83,6 +93,19 @@ class Sphero
 
       def response header, body
         Response::GetPowerState.new header, body
+      end
+    end
+
+    class Sleep < Request
+      def initialize seq, wakeup, macro
+        super(seq, [wakeup, macro])
+        @cid    = 0x22
+      end
+
+      private
+
+      def packet_body
+        @data.pack 'nC'
       end
     end
   end
