@@ -56,6 +56,10 @@ class Sphero
     write_packet Request::Heading.new(@seq, h)
   end
 
+  def back_led_output= h
+    write_packet Request::SetBackLEDOutput.new(@seq, h)
+  end
+
   private
 
   def write_packet packet
@@ -108,9 +112,13 @@ if $0 == __FILE__
     p s.ping
   }
 
-  0.step(360, 1) { |i|
-    i = 0 if i == 360
-    s.heading = i
-    sleep 0.5
-  }
+  s.back_led_output = 255
+
+  s.heading = 180
+  #36.times {
+  #  i = 10
+  #  p :step => i
+  #  s.heading = i
+  #  sleep 0.5
+  #}
 end

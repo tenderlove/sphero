@@ -61,6 +61,13 @@ class Sphero
       end
     end
 
+    class SetBackLEDOutput < Sphero
+      def initialize seq, brightness
+        super(seq, [brightness])
+        @cid = 0x21
+      end
+    end
+
     class Ping < Request
       def initialize seq
         super(seq, [])
