@@ -32,7 +32,7 @@ class Sphero
   end
 
   def disable_auto_reconnect
-    write_packet Request::SetAutoReconnect.new(@seq, 0, false)
+    write_packet Request::SetAutoReconnect.new(@seq, 0, 0x00)
   end
 
   def power_state

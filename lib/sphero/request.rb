@@ -94,8 +94,8 @@ class Sphero
     end
 
     class SetAutoReconnect < Request
-      def initialize seq, time = 7, enabled = true
-        super(seq, [enabled ? 0x01 : 0x00, time])
+      def initialize seq, time = 7, enabled = 0x01
+        super(seq, [enabled, time])
         @cid = 0x12
       end
     end
