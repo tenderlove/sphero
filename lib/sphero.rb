@@ -35,6 +35,10 @@ class Sphero
     write_packet Request::SetAutoReconnect.new(@seq, 0, false)
   end
 
+  def power_state
+    write_packet Request::GetPowerState.new(@seq)
+  end
+
   def roll speed, heading, delay = 0x01
     cmd = [speed, heading >> 8, heading & 0xFF, delay]
     write 0x30, cmd, 0x02
@@ -101,12 +105,7 @@ if $0 == __FILE__
   }
 
   obj = s.bluetooth_info
-  p obj
-  p obj.name
-  p obj.bta
-  p s.auto_reconnect
-  s.auto_reconnect = 3
-  p s.auto_reconnect
-  s.auto_reconnect = 0
-  p s.auto_reconnect
+  ps = s.power_state
+  p ps
+  p ps.body
 end

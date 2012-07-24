@@ -80,6 +80,10 @@ class Sphero
         super(seq, [])
         @cid = 0x20
       end
+
+      def response header, body
+        Response::GetPowerState.new header, body
+      end
     end
   end
 end
