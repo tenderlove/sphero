@@ -75,6 +75,13 @@ class Sphero
       end
     end
 
+    class RGB < Sphero
+      def initialize seq, r, g, b, persistant
+        super(seq, [r, g, b, persistant])
+        @cid = 0x20
+      end
+    end
+
     class Ping < Request
       def initialize seq
         super(seq, [])

@@ -56,6 +56,10 @@ class Sphero
     write_packet Request::Heading.new(@seq, h)
   end
 
+  def rgb r, g, b, persistant = false
+    write_packet Request::RGB.new(@seq, r, g, b, persistant ? 0x01 : 0x00)
+  end
+
   # Brightness 0x00 - 0xFF
   def back_led_output= h
     write_packet Request::SetBackLEDOutput.new(@seq, h)
@@ -118,13 +122,15 @@ if $0 == __FILE__
     p s.ping
   }
 
-  s.back_led_output = 255
+  s.back_led_output = 0
 
-  s.rotation_rate = 1
-  s.heading = 180
+  s.rgb 0, 255, 0
   sleep 5
-  s.rotation_rate = 255
-  s.heading = 180
+  s.rgb 255, 0, 0
+  sleep 5
+  s.rgb 0, 0, 255
+  sleep 5
+
   #36.times {
   #  i = 10
   #  p :step => i
