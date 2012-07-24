@@ -1,36 +1,9 @@
 require 'serialport'
+require 'sphero/request'
+require 'sphero/response'
 
 class Sphero
   VERSION = '1.0.0'
-
-  class Response
-    SOP1 = 0
-    SOP2 = 1
-    MRSP = 2
-    SEQ  = 3
-    DLEN = 4
-
-    CODE_OK = 0
-
-    attr_reader :body
-
-    def initialize header, body
-      @header = header
-      @body   = body
-    end
-
-    def empty?
-      @header[DLEN] == 1
-    end
-
-    def success?
-      @header[MRSP] == CODE_OK
-    end
-
-    def seq
-      @header[SEQ]
-    end
-  end
 
   def initialize dev
     @sp = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
@@ -39,28 +12,27 @@ class Sphero
   end
 
   def ping
-    write 0x01
+    write_packet Request::Ping.new(@seq)
   end
 
   def version
-    write 0x02
+    write_packet Request::GetVersioning.new(@seq)
   end
 
   def bluetooth_info
-    resp = write 0x11
-    [resp.body.take(15).pack('C*'), resp.body.drop(15).pack('C*')]
+    write_packet Request::GetBluetoothInfo.new(@seq)
   end
 
   def auto_reconnect= time_s
-    write 0x12, [0x01, time_s]
+    write_packet Request::SetAutoReconnect.new(@seq, time_s)
   end
 
   def auto_reconnect
-    write(0x13).body[1]
+    write_packet(Request::GetAutoReconnect.new(@seq)).time
   end
 
   def disable_auto_reconnect
-    write 0x12, [0x00, 0x05]
+    write_packet Request::SetAutoReconnect.new(@seq, 0, false)
   end
 
   def roll speed, heading, delay = 0x01
@@ -77,6 +49,21 @@ class Sphero
   end
 
   private
+
+  def write_packet packet
+    @sp.write packet.to_str
+    @seq += 1
+
+    header   = @sp.read(5).unpack 'C5'
+    body     = @sp.read header.last
+    response = packet.response header, body
+
+    if response.success?
+      response
+    else
+      raise response
+    end
+  end
 
   def write cmd, data = [], did = @dev
     data_len = data.length + 1
@@ -103,29 +90,23 @@ end
 
 if $0 == __FILE__
   begin
-    s = Sphero.new "/dev/tty.Sphero-PRG-RN-SPP"
+    s = Sphero.new "/dev/tty.Sphero-BRR-RN-SPP"
   rescue Errno::EBUSY
     p :wtf
     retry
   end
 
-  p s.ping
-  p s.roll(125, 0)
-
-  trap(:INT) {
-    s.stop
-    exit!
+  10.times {
+    p s.ping
   }
 
-  sleep 1
-  loop do
-  0.step(360, 30) { |h|
-    h = 0 if h == 360
-
-    s.heading = h
-    sleep 1
-  }
-  end
-  sleep 1
-  s.stop
+  obj = s.bluetooth_info
+  p obj
+  p obj.name
+  p obj.bta
+  p s.auto_reconnect
+  s.auto_reconnect = 3
+  p s.auto_reconnect
+  s.auto_reconnect = 0
+  p s.auto_reconnect
 end

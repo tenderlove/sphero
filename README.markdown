@@ -15,18 +15,12 @@ provided by the bluetooth connection.
 
 ```ruby
 s = Sphero.new "/dev/tty.Sphero-PRG-RN-SPP"
-p s.ping
+s.ping
 
 # Roll 0 degrees, speed 125
-p s.roll(125, 0)
+s.roll(125, 0)
 
-trap(:INT) {
-  s.stop # Stop the ball
-  exit!
-}
-
-sleep 1
-loop do
+# Turn 360 degrees, 30 degrees at a time
 0.step(360, 30) { |h|
   h = 0 if h == 360
 
@@ -34,7 +28,6 @@ loop do
   s.heading = h
   sleep 1
 }
-end
 sleep 1
 s.stop
 ```
