@@ -40,8 +40,7 @@ class Sphero
   end
 
   def sleep wakeup = 0, macro = 0
-    obj = Request::Sleep.new(@seq, wakeup, macro)
-    write_packet obj
+    write_packet Request::Sleep.new(@seq, wakeup, macro)
   end
 
   def roll speed, heading, delay = 0x01
