@@ -56,8 +56,14 @@ class Sphero
     write_packet Request::Heading.new(@seq, h)
   end
 
+  # Brightness 0x00 - 0xFF
   def back_led_output= h
     write_packet Request::SetBackLEDOutput.new(@seq, h)
+  end
+
+  # Rotation Rate 0x00 - 0xFF
+  def rotation_rate= h
+    write_packet Request::SetRotationRate.new(@seq, h)
   end
 
   private
@@ -114,6 +120,10 @@ if $0 == __FILE__
 
   s.back_led_output = 255
 
+  s.rotation_rate = 1
+  s.heading = 180
+  sleep 5
+  s.rotation_rate = 255
   s.heading = 180
   #36.times {
   #  i = 10

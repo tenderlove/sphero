@@ -68,6 +68,13 @@ class Sphero
       end
     end
 
+    class SetRotationRate < Sphero
+      def initialize seq, rate
+        super(seq, [rate])
+        @cid = 0x03
+      end
+    end
+
     class Ping < Request
       def initialize seq
         super(seq, [])
