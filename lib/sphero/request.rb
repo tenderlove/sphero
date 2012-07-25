@@ -3,6 +3,8 @@ class Sphero
     SOP1 = 0xFF
     SOP2 = 0xFF
 
+    attr_reader :data
+
     def initialize seq, data = []
       @seq    = seq
       @data   = data
@@ -19,7 +21,12 @@ class Sphero
     end
 
     def response header, body
-      Response.new header, body
+      name = self.class.name.split('::').last
+      klass = if Response.const_defined?(name)
+        Response.const_get(name).new header, body
+      else
+        Response.new header, body
+      end
     end
 
     def packet_header
@@ -49,47 +56,23 @@ class Sphero
       end
     end
 
-    class Heading < Sphero
-      def initialize seq, heading
-        super(seq, [heading])
-        @cid  = 0x01
-      end
-
-      private
-      def packet_body
-        @data.pack 'n'
-      end
+    def self.make_command klass, cid, &block
+      Class.new(klass) {
+        define_method(:initialize) do |seq, *args|
+          super(seq, args)
+          @cid = cid
+        end
+      }
     end
 
-    class SetBackLEDOutput < Sphero
-      def initialize seq, brightness
-        super(seq, [brightness])
-        @cid = 0x21
-      end
-    end
-
-    class SetRotationRate < Sphero
-      def initialize seq, rate
-        super(seq, [rate])
-        @cid = 0x03
-      end
-    end
-
-    class SetRGB < Sphero
-      def initialize seq, r, g, b, persistant
-        super(seq, [r, g, b, persistant])
-        @cid = 0x20
-      end
-    end
+    SetBackLEDOutput = make_command Sphero, 0x21
+    SetRotationRate  = make_command Sphero, 0x03
+    SetRGB           = make_command Sphero, 0x20
 
     class GetRGB < Sphero
       def initialize seq
         super(seq, [])
         @cid = 0x22
-      end
-
-      def response header, body
-        Response::GetRGB.new header, body
       end
     end
 
@@ -124,10 +107,6 @@ class Sphero
         super(seq, [])
         @cid  = 0x11
       end
-
-      def response header, body
-        Response::GetBluetoothInfo.new header, body
-      end
     end
 
     class SetAutoReconnect < Request
@@ -142,20 +121,12 @@ class Sphero
         super(seq, [])
         @cid = 0x13
       end
-
-      def response header, body
-        Response::GetAutoReconnect.new header, body
-      end
     end
 
     class GetPowerState < Request
       def initialize seq
         super(seq, [])
         @cid = 0x20
-      end
-
-      def response header, body
-        Response::GetPowerState.new header, body
       end
     end
 

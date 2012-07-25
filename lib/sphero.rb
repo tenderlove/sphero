@@ -54,6 +54,11 @@ class Sphero
   end
 
   def heading= h
+    p :heading => h
+    heading = Request::Heading.new(@seq, h)
+    p Request::Heading
+    p heading
+    p heading.packet_body
     write Request::Heading.new(@seq, h)
   end
 
@@ -114,14 +119,27 @@ if $0 == __FILE__
 
   trap(:INT) {
     s.stop
+    exit!
   }
 
-  s.roll 100, 0
+  #s.roll 100, 0
 
+  p s.auto_reconnect
+  exit
   loop do
     [0, 180].each do |dir|
       s.heading = dir
+      sleep 10
     end
+
+    #[
+    #  [0, 0, 0xFF],
+    #  [0xFF, 0, 0],
+    #  [0, 0xFF, 0],
+    #].each do |color|
+    #  s.rgb(*color)
+    #  sleep 5
+    #end
   end
 
   #36.times {
