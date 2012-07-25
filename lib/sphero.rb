@@ -124,7 +124,7 @@ if $0 == __FILE__
 
   #s.roll 100, 0
 
-  p s.auto_reconnect
+  p s.user_led
   exit
   loop do
     [0, 180].each do |dir|

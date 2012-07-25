@@ -68,13 +68,14 @@ class Sphero
     SetBackLEDOutput = make_command Sphero, 0x21
     SetRotationRate  = make_command Sphero, 0x03
     SetRGB           = make_command Sphero, 0x20
+    GetRGB           = make_command Sphero, 0x22
 
-    class GetRGB < Sphero
-      def initialize seq
-        super(seq, [])
-        @cid = 0x22
-      end
-    end
+    Ping             = make_command Request, 0x01
+    GetVersioning    = make_command Request, 0x02
+    GetBluetoothInfo = make_command Request, 0x11
+    SetAutoReconnect = make_command Request, 0x12
+    GetAutoReconnect = make_command Request, 0x13
+    GetPowerState    = make_command Request, 0x20
 
     class Roll < Sphero
       def initialize seq, speed, heading, delay
@@ -85,48 +86,6 @@ class Sphero
       private
       def packet_body
         @data.pack 'CnC'
-      end
-    end
-
-    class Ping < Request
-      def initialize seq
-        super(seq, [])
-        @cid  = 0x01
-      end
-    end
-
-    class GetVersioning < Request
-      def initialize seq
-        super(seq, [])
-        @cid  = 0x02
-      end
-    end
-
-    class GetBluetoothInfo < Request
-      def initialize seq
-        super(seq, [])
-        @cid  = 0x11
-      end
-    end
-
-    class SetAutoReconnect < Request
-      def initialize seq, time = 7, enabled = 0x01
-        super(seq, [enabled, time])
-        @cid = 0x12
-      end
-    end
-
-    class GetAutoReconnect < Request
-      def initialize seq
-        super(seq, [])
-        @cid = 0x13
-      end
-    end
-
-    class GetPowerState < Request
-      def initialize seq
-        super(seq, [])
-        @cid = 0x20
       end
     end
 
