@@ -1,50 +1,52 @@
 require 'serialport'
 require 'sphero/request'
 require 'sphero/response'
+require 'thread'
 
 class Sphero
   VERSION = '1.0.0'
 
   def initialize dev
-    @sp = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
-    @dev = 0x00
-    @seq = 0x00
+    @sp   = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
+    @dev  = 0x00
+    @seq  = 0x00
+    @lock = Mutex.new
   end
 
   def ping
-    write_packet Request::Ping.new(@seq)
+    write Request::Ping.new(@seq)
   end
 
   def version
-    write_packet Request::GetVersioning.new(@seq)
+    write Request::GetVersioning.new(@seq)
   end
 
   def bluetooth_info
-    write_packet Request::GetBluetoothInfo.new(@seq)
+    write Request::GetBluetoothInfo.new(@seq)
   end
 
   def auto_reconnect= time_s
-    write_packet Request::SetAutoReconnect.new(@seq, time_s)
+    write Request::SetAutoReconnect.new(@seq, time_s)
   end
 
   def auto_reconnect
-    write_packet(Request::GetAutoReconnect.new(@seq)).time
+    write(Request::GetAutoReconnect.new(@seq)).time
   end
 
   def disable_auto_reconnect
-    write_packet Request::SetAutoReconnect.new(@seq, 0, 0x00)
+    write Request::SetAutoReconnect.new(@seq, 0, 0x00)
   end
 
   def power_state
-    write_packet Request::GetPowerState.new(@seq)
+    write Request::GetPowerState.new(@seq)
   end
 
   def sleep wakeup = 0, macro = 0
-    write_packet Request::Sleep.new(@seq, wakeup, macro)
+    write Request::Sleep.new(@seq, wakeup, macro)
   end
 
   def roll speed, heading, state = true
-    write_packet Request::Roll.new(@seq, speed, heading, state ? 0x01 : 0x00)
+    write Request::Roll.new(@seq, speed, heading, state ? 0x01 : 0x00)
   end
 
   def stop
@@ -52,53 +54,38 @@ class Sphero
   end
 
   def heading= h
-    write_packet Request::Heading.new(@seq, h)
+    write Request::Heading.new(@seq, h)
   end
 
   def rgb r, g, b, persistant = false
-    write_packet Request::RGB.new(@seq, r, g, b, persistant ? 0x01 : 0x00)
+    write Request::RGB.new(@seq, r, g, b, persistant ? 0x01 : 0x00)
   end
 
   # Brightness 0x00 - 0xFF
   def back_led_output= h
-    write_packet Request::SetBackLEDOutput.new(@seq, h)
+    write Request::SetBackLEDOutput.new(@seq, h)
   end
 
   # Rotation Rate 0x00 - 0xFF
   def rotation_rate= h
-    write_packet Request::SetRotationRate.new(@seq, h)
+    write Request::SetRotationRate.new(@seq, h)
   end
 
   private
 
-  def write_packet packet
-    @sp.write packet.to_str
-    @seq += 1
+  def write packet
+    header = nil
+    body   = nil
 
-    header   = @sp.read(5).unpack 'C5'
-    body     = @sp.read header.last
-    response = packet.response header, body
+    @lock.synchronize do
+      @sp.write packet.to_str
+      @seq += 1
 
-    if response.success?
-      response
-    else
-      raise response
+      header   = @sp.read(5).unpack 'C5'
+      body     = @sp.read header.last
     end
-  end
 
-  def write cmd, data = [], did = @dev
-    data_len = data.length + 1
-
-    packet = [0xFF, 0xFF, did, cmd, @seq, data_len] + data
-    checksum = packet.drop(2).reduce :+
-
-    packet << ~(checksum % 256)
-    @sp.write packet.pack('C*')
-    @seq += 1
-
-    header   = @sp.read(5).unpack('C5')
-    body     = @sp.read(header.last).unpack 'C*'
-    response = Response.new header, body
+    response = packet.response header, body
 
     if response.success?
       response
@@ -108,12 +95,10 @@ class Sphero
   end
 end
 
-
 if $0 == __FILE__
   begin
     s = Sphero.new "/dev/tty.Sphero-BRR-RN-SPP"
   rescue Errno::EBUSY
-    p :wtf
     retry
   end
 
@@ -121,9 +106,8 @@ if $0 == __FILE__
     p s.ping
   }
 
-  s.roll(255, 0)
-  sleep 5
-  s.stop
+  s.heading = 180
+  s.heading = 0
 
   #36.times {
   #  i = 10
