@@ -76,6 +76,10 @@ class Sphero
     write 0x01, [h >> 8, h & 0xFF], 0x02
   end
 
+  def color red, green, blue
+    write 0x20, [red, green, blue], 0x02
+  end
+
   private
 
   def write cmd, data = [], did = @dev
