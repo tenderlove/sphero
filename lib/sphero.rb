@@ -43,13 +43,12 @@ class Sphero
     write_packet Request::Sleep.new(@seq, wakeup, macro)
   end
 
-  def roll speed, heading, delay = 0x01
-    cmd = [speed, heading >> 8, heading & 0xFF, delay]
-    write 0x30, cmd, 0x02
+  def roll speed, heading, state = true
+    write_packet Request::Roll.new(@seq, speed, heading, state ? 0x01 : 0x00)
   end
 
   def stop
-    write 0x30, [0x01, 0x00, 0x00, 0x00], 0x02
+    roll 0, 0
   end
 
   def heading= h
@@ -122,14 +121,9 @@ if $0 == __FILE__
     p s.ping
   }
 
-  s.back_led_output = 0
-
-  s.rgb 0, 255, 0
+  s.roll(255, 0)
   sleep 5
-  s.rgb 255, 0, 0
-  sleep 5
-  s.rgb 0, 0, 255
-  sleep 5
+  s.stop
 
   #36.times {
   #  i = 10

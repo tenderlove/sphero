@@ -82,6 +82,18 @@ class Sphero
       end
     end
 
+    class Roll < Sphero
+      def initialize seq, speed, heading, delay
+        super(seq, [speed, heading, delay])
+        @cid = 0x30
+      end
+
+      private
+      def packet_body
+        @data.pack 'CnC'
+      end
+    end
+
     class Ping < Request
       def initialize seq
         super(seq, [])
