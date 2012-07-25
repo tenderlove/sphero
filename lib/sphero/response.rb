@@ -78,5 +78,11 @@ class Sphero
         body.drop(16).slice_before(0x00).first.pack 'C*'
       end
     end
+
+    class GetRGB < Response
+      def r; body[0]; end
+      def g; body[1]; end
+      def b; body[2]; end
+    end
   end
 end

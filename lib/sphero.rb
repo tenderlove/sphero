@@ -58,7 +58,13 @@ class Sphero
   end
 
   def rgb r, g, b, persistant = false
-    write Request::RGB.new(@seq, r, g, b, persistant ? 0x01 : 0x00)
+    write Request::SetRGB.new(@seq, r, g, b, persistant ? 0x01 : 0x00)
+  end
+
+  # This retrieves the "user LED color" which is stored in the config block
+  # (which may or may not be actively driven to the RGB LED).
+  def user_led
+    write Request::GetRGB.new(@seq)
   end
 
   # Brightness 0x00 - 0xFF
@@ -106,8 +112,17 @@ if $0 == __FILE__
     p s.ping
   }
 
-  s.heading = 180
-  s.heading = 0
+  trap(:INT) {
+    s.stop
+  }
+
+  s.roll 100, 0
+
+  loop do
+    [0, 180].each do |dir|
+      s.heading = dir
+    end
+  end
 
   #36.times {
   #  i = 10

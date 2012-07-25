@@ -75,10 +75,21 @@ class Sphero
       end
     end
 
-    class RGB < Sphero
+    class SetRGB < Sphero
       def initialize seq, r, g, b, persistant
         super(seq, [r, g, b, persistant])
         @cid = 0x20
+      end
+    end
+
+    class GetRGB < Sphero
+      def initialize seq
+        super(seq, [])
+        @cid = 0x22
+      end
+
+      def response header, body
+        Response::GetRGB.new header, body
       end
     end
 
