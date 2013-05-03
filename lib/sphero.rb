@@ -82,6 +82,10 @@ class Sphero
     write Request::SetRotationRate.new(@seq, h)
   end
 
+  def color red, green, blue
+    write 0x20, [red, green, blue], 0x02
+  end
+
   private
 
   def write packet
