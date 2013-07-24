@@ -1,24 +1,33 @@
-require 'serialport'
+$RUBY_SPHERO_RS232 = ENV['RUBY_SPHERO_RS232']
+
+if $RUBY_SPHERO_RS232
+  require 'rs232'
+else
+  require 'serialport'
+end
+
 require 'sphero/request'
 require 'sphero/response'
 require 'thread'
-
-require 'rs232'
 
 class Sphero
   VERSION = '1.0.0'
 
   def initialize dev
-    #@sp   = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
-	
-	params = Hash.new
-	params[:baudrate] = 115200
-    params[:bytesize] = 8
-    params[:stopbits] = RS232::DCB::ONESTOPBIT
-    params[:parity] = RS232::DCB::NOPARITY
-	  
-	@sp   = RS232.new dev, params
-	@sp.report = true
+  
+    if $RUBY_SPHERO_RS232
+      params = Hash.new
+      params[:baudrate] = 115200
+      params[:bytesize] = 8
+      params[:stopbits] = RS232::DCB::ONESTOPBIT
+      params[:parity] = RS232::DCB::NOPARITY
+        
+      @sp   = RS232.new dev, params
+      @sp.report = false	
+    else
+      @sp   = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
+    end
+
 	
     @dev  = 0x00
     @seq  = 0x00
@@ -105,28 +114,27 @@ class Sphero
     body   = nil
 
     @lock.synchronize do
-	
-	  write_len = 6 + packet.dlen
-	  format = "C#{write_len}"
-	
-	  puts "write #{packet.to_str.unpack(format)}"
+    
+      write_len = 6 + packet.dlen
+      format = "C#{write_len}"
+    
       @sp.write packet.to_str
       @seq += 1
-	  
-      #header   = @sp.read(5).unpack 'C5'
-      #body     = @sp.read header.last
-	  
-	  response = @sp.read
-	  count = @sp.count.read_uint32
-	  puts "response = #{response}, #{count}"
-	  
-	  format = "C#{count}"
-	  response = response.unpack(format)
-	  
-	  header = response[0..4]
-	  body = response[5..-1].join
-	  puts "#{header}, #{body}"
-	 
+    
+      if $RUBY_SPHERO_RS232
+        response = @sp.read
+        count = @sp.count.read_uint32
+
+        format = "C#{count}"
+        response = response.unpack(format)
+        
+        header = response[0..4]
+        body = response[5..-1].join
+      else
+        header   = @sp.read(5).unpack 'C5'
+        body     = @sp.read header.last
+      end
+      
     end
 
     response = packet.response header, body
