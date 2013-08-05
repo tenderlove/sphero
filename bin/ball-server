@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require 'sphero'
+require 'drb'
+
+begin
+  s = Sphero.new ARGV[0]
+rescue Errno::EBUSY
+  puts "retrying"
+  retry
+end
+
+at_exit { s.stop }
+
+puts "starting"
+
+URI = "druby://localhost:0"
+server = DRb.start_service URI, s
+puts "Listening on #{server.uri}"
+DRb.thread.join
