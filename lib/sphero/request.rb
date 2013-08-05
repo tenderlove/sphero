@@ -34,7 +34,7 @@ class Sphero
     end
 
     def packet_body
-      @data.pack 'C*'
+      @data.pack @pattern
     end
 
     def checksum
@@ -56,11 +56,12 @@ class Sphero
       end
     end
 
-    def self.make_command klass, cid, &block
+    def self.make_command klass, cid, pattern = 'C*', &block
       Class.new(klass) {
         define_method(:initialize) do |seq, *args|
           super(seq, args)
-          @cid = cid
+          @cid     = cid
+          @pattern = pattern
         end
       }
     end
@@ -69,6 +70,8 @@ class Sphero
     SetRotationRate  = make_command Sphero, 0x03
     SetRGB           = make_command Sphero, 0x20
     GetRGB           = make_command Sphero, 0x22
+    Heading          = make_command Sphero, 0x01, 'n'
+    Roll             = make_command Sphero, 0x30, 'CnC'
 
     Ping             = make_command Request, 0x01
     GetVersioning    = make_command Request, 0x02
@@ -76,29 +79,6 @@ class Sphero
     SetAutoReconnect = make_command Request, 0x12
     GetAutoReconnect = make_command Request, 0x13
     GetPowerState    = make_command Request, 0x20
-
-    class Roll < Sphero
-      def initialize seq, speed, heading, delay
-        super(seq, [speed, heading, delay])
-        @cid = 0x30
-      end
-
-      private
-      def packet_body
-        @data.pack 'CnC'
-      end
-    end
-
-    class Heading < Sphero
-      def initialize seq, *args
-        super(seq, args)
-        @cid = 0x01
-      end
-
-      def packet_body
-        @data.pack 'n'
-      end
-    end
 
     class Sleep < Request
       def initialize seq, wakeup, macro
