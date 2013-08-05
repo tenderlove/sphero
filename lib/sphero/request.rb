@@ -23,10 +23,11 @@ class Sphero
     def response header, body
       name = self.class.name.split('::').last
       klass = if Response.const_defined?(name)
-        Response.const_get(name).new header, body
+        Response.const_get(name)
       else
-        Response.new header, body
+        Response
       end
+      klass.new header, body
     end
 
     def packet_header
