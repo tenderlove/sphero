@@ -54,11 +54,6 @@ class Sphero
   end
 
   def heading= h
-    p :heading => h
-    heading = Request::Heading.new(@seq, h)
-    p Request::Heading
-    p heading
-    p heading.packet_body
     write Request::Heading.new(@seq, h)
   end
 
