@@ -3,7 +3,7 @@ CHANGELOG.rdoc
 Manifest.txt
 README.markdown
 Rakefile
-bin/sphero
+bin/ball-server
 lib/sphero.rb
 lib/sphero/request.rb
 lib/sphero/response.rb
