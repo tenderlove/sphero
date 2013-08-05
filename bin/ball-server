@@ -14,7 +14,7 @@ at_exit { s.stop }
 
 puts "starting"
 
-URI = "druby://localhost:0"
+URI = "druby://0.0.0.0:0"
 server = DRb.start_service URI, s
 puts "Listening on #{server.uri}"
 DRb.thread.join
