@@ -1,4 +1,7 @@
 class Sphero
+  class Exception < RuntimeError
+  end
+
   class Response
     SOP1 = 0
     SOP2 = 1
@@ -39,10 +42,20 @@ class Sphero
       CODE_MA_CORRUPT   => 'Main Application corrupt',
       CODE_MSG_TIMEOUT  => 'Msg state machine timed out',
     }
+    CODE_TO_EXCEPTION = {}
+
+    CODE_TO_MESSAGE.each do |k,v|
+      next if k == CODE_OK
+      CODE_TO_EXCEPTION[k] = Exception.new(v)
+    end
 
     def initialize header, body
       @header = header
       @body   = body
+    end
+
+    def exception
+      CODE_TO_EXCEPTION[MRSP]
     end
 
     def empty?
