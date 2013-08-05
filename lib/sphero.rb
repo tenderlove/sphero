@@ -6,6 +6,11 @@ require 'thread'
 class Sphero
   VERSION = '1.0.0'
 
+  def self.Client uri
+    require 'drb'
+    DRbObject.new_with_uri uri
+  end
+
   def initialize dev
     @sp   = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
     @dev  = 0x00
