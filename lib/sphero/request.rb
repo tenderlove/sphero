@@ -79,18 +79,6 @@ class Sphero
     SetAutoReconnect = make_command Request, 0x12
     GetAutoReconnect = make_command Request, 0x13
     GetPowerState    = make_command Request, 0x20
-
-    class Sleep < Request
-      def initialize seq, wakeup, macro
-        super(seq, [wakeup, macro])
-        @cid    = 0x22
-      end
-
-      private
-
-      def packet_body
-        @data.pack 'nC'
-      end
-    end
+    Sleep            = make_command Request, 0x22, 'nC'
   end
 end
