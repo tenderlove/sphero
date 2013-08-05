@@ -69,6 +69,7 @@ class Sphero
     SetRotationRate  = make_command Sphero, 0x03
     SetRGB           = make_command Sphero, 0x20
     GetRGB           = make_command Sphero, 0x22
+    Heading          = make_command Sphero, 0x01
 
     Ping             = make_command Request, 0x01
     GetVersioning    = make_command Request, 0x02

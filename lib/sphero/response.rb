@@ -6,7 +6,39 @@ class Sphero
     SEQ  = 3
     DLEN = 4
 
-    CODE_OK = 0
+    CODE_OK           = 0x0
+    CODE_EGEN         = 0x1
+    CODE_ECHKSUM      = 0x2
+    CODE_EFRAG        = 0x3
+    CODE_EBAD_CMD     = 0x4
+    CODE_EUNSUPP      = 0x5
+    CODE_EBAD_MSG     = 0x06
+    CODE_EPARAM       = 0x07
+    CODE_EEXEC        = 0x08
+    CODE_EBAD_DID     = 0x09
+    CODE_POWER_NOGOOD = 0x31
+    CODE_PAGE_ILLEGAL = 0x32
+    CODE_FLASH_FAIL   = 0x33
+    CODE_MA_CORRUPT   = 0x34
+    CODE_MSG_TIMEOUT  = 0x35
+
+    CODE_TO_MESSAGE = {
+      CODE_OK           => 'Command succeeded',
+      CODE_EGEN         => 'General, non-specific error',
+      CODE_ECHKSUM      => 'Received checksum failure',
+      CODE_EFRAG        => 'Received command fragment',
+      CODE_EBAD_CMD     => 'Unknown command ID',
+      CODE_EUNSUPP      => 'Command currently unsupported',
+      CODE_EBAD_MSG     => 'Bad message format',
+      CODE_EPARAM       => 'Parameter value(s) invalid',
+      CODE_EEXEC        => 'Failed to execute command',
+      CODE_EBAD_DID     => 'Unknown Device ID',
+      CODE_POWER_NOGOOD => 'Voltage too low for reflash operation',
+      CODE_PAGE_ILLEGAL => 'Illegal page number provided',
+      CODE_FLASH_FAIL   => 'Page did not reprogram correctly',
+      CODE_MA_CORRUPT   => 'Main Application corrupt',
+      CODE_MSG_TIMEOUT  => 'Msg state machine timed out',
+    }
 
     def initialize header, body
       @header = header
