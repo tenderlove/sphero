@@ -31,7 +31,8 @@ class Sphero
     end
 
     def packet_header
-      header.pack 'C*'
+      format = "C" * header.length
+      header.pack format
     end
 
     def packet_body
@@ -39,9 +40,9 @@ class Sphero
     end
 
     def checksum
-      unpacked_header_and_body = (packet_header + packet_body).unpack("C*")
-      dropped_sops = unpacked_header_and_body.drop(2)
-      reduced = dropped_sops.reduce(:+)
+      unpacked_header_and_body = (packet_header + packet_body).unpack "C*"
+      dropped_sops = unpacked_header_and_body.drop 2
+      reduced = dropped_sops.reduce(:+) % 256
       ones_complement = ~reduced
       ones_complement & 0xFF
     end
