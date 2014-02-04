@@ -8,7 +8,7 @@ class Sphero
     def initialize seq, data = []
       @seq    = seq
       @data   = data
-      @did    = 0x00
+      @did    = 0x00 # virtual device id for core
     end
 
     def header
@@ -53,7 +53,7 @@ class Sphero
     class Sphero < Request
       def initialize seq, data = []
         super
-        @did = 0x02
+        @did = 0x02 # virtual device id for sphero
       end
     end
 

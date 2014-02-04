@@ -1,4 +1,11 @@
-require 'serialport'
+$RUBY_SPHERO_RS232 = ENV['RUBY_SPHERO_RS232']
+
+if $RUBY_SPHERO_RS232
+  require 'rs232'
+else
+  require 'serialport'
+end
+
 require 'sphero/request'
 require 'sphero/response'
 require 'thread'
@@ -12,7 +19,21 @@ class Sphero
   end
 
   def initialize dev
-    @sp   = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
+  
+    if $RUBY_SPHERO_RS232
+      params = Hash.new
+      params[:baudrate] = 115200
+      params[:bytesize] = 8
+      params[:stopbits] = RS232::DCB::ONESTOPBIT
+      params[:parity] = RS232::DCB::NOPARITY
+        
+      @sp   = RS232.new dev, params
+      @sp.report = false	
+    else
+      @sp   = SerialPort.new dev, 115200, 8, 1, SerialPort::NONE
+    end
+
+	
     @dev  = 0x00
     @seq  = 0x00
     @lock = Mutex.new
@@ -93,11 +114,27 @@ class Sphero
     body   = nil
 
     @lock.synchronize do
+    
+      write_len = 6 + packet.dlen
+      format = "C#{write_len}"
+    
       @sp.write packet.to_str
       @seq += 1
+    
+      if $RUBY_SPHERO_RS232
+        response = @sp.read
+        count = @sp.count.read_uint32
 
-      header   = @sp.read(5).unpack 'C5'
-      body     = @sp.read header.last
+        format = "C#{count}"
+        response = response.unpack(format)
+        
+        header = response[0..4]
+        body = response[5..-1].join
+      else
+        header   = @sp.read(5).unpack 'C5'
+        body     = @sp.read header.last
+      end
+      
     end
 
     response = packet.response header, body
@@ -105,7 +142,7 @@ class Sphero
     if response.success?
       response
     else
-      raise response
+      raise "Response failed"
     end
   end
 end
